@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using AutoUpdaterDotNET;
+using BrightIdeasSoftware;
 using NoitaSaveManager.Noita;
 using NoitaSaveManager.Utils;
 
@@ -12,6 +14,8 @@ namespace NoitaSaveManager
 {
     public partial class MainForm : Form
     {
+        private delegate void SafeCallDelegate();
+
         private string installPath;
         private string noitaSavePath;
         private string localSavePath;
@@ -53,20 +57,24 @@ namespace NoitaSaveManager
             AutoUpdater.Start("https://noita.r4wizard.co.uk/AutoUpdater.xml");
             Analytics.TrackPage("Main Form", "/main-form");
 
+            GameHandler.GameFinished += GameHandler_GameFinished;
+
             label1.Text = "NSM by R4wizard\nv" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
 
             gameSaves.Add("--default", new GameSave
             {
                 ID = "--default",
                 Name = "Play Noita",
-                SubName = "Launch Noita without any changes.",
+                Group = "New Game",
+                Subtitle = "Launch Noita without any changes.",
                 BuiltIn = true
             });
             gameSaves.Add("--custom", new GameSave
             {
                 ID = "--custom",
                 Name = "Play Noita with Custom Seed",
-                SubName = "Launch Noita with your own custom seed.",
+                Group = "New Game",
+                Subtitle = "Launch Noita with your own custom seed.",
                 BuiltIn = true
             });
 
@@ -76,14 +84,39 @@ namespace NoitaSaveManager
                 gameSaves.Add(save.ID, save);
             }
 
-            UpdateSavesList();
+
+            olvGSColumnName.Renderer = CreateDescribedRowRenderer();
+            olvGSColumnName.GroupKeyGetter = delegate (object row)
+            {
+                GameSave save = (GameSave)row;
+                return save.Group;
+            };
+
+            olvGSColumnName.GroupFormatter = (BrightIdeasSoftware.OLVGroup group, BrightIdeasSoftware.GroupingParameters parms) =>
+            {
+                group.Id = 2;
+
+                if (group.Name == "Play Game")
+                    group.Id = 1;
+
+                if (group.Name == "Auto Saves")
+                    group.Id = 3;
+                
+                parms.GroupComparer = Comparer<BrightIdeasSoftware.OLVGroup>.Create((x, y) => (x.GroupId.CompareTo(y.GroupId)));
+            };
+
+            lstGameSaves.Sort(new OLVColumn("hidden", "LastModified"));
+            lstGameSaves.CellPadding = new Rectangle(10, 3, 10, 3);
+            lstGameSaves.RowHeight = 39;
+            lstGameSaves.AlwaysGroupByColumn = olvGSColumnName;
+            lstGameSaves.SetObjects(gameSaves.Values);
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
             GameSave selectedSave = null;
-            if (lstSaves.SelectedItems.Count >= 1)
-                selectedSave = (GameSave)lstSaves.SelectedItems[0].Tag;
+            if (lstGameSaves.SelectedItems.Count >= 1)
+                selectedSave = (GameSave)lstGameSaves.SelectedItem.RowObject;
 
             if (selectedSave == null || selectedSave.BuiltIn)
                 selectedSave = null;
@@ -95,37 +128,14 @@ namespace NoitaSaveManager
                     selectedSave = null;
             }
 
-            if (selectedSave == null)
-            {
-                string name = Prompt.ShowDialog("Enter new save name");
-                string id = GetUnusedId(name);
-
-                if (name.Trim() == "")
-                    name = "Unnamed Save";
-
-                selectedSave = new GameSave
-                {
-                    ID = id,
-                    Name = name,
-                    GameVersion = gameVersionHash,
-                    Location = Path.Combine(localSavePath, id),
-                    LastModified = DateTime.Now
-                };
-                gameSaves.Add(id, selectedSave);
-            }
-
-            UpdateSavesList();
-
-            selectedSave.LastModified = DateTime.Now;
-            selectedSave.CopyToStore(noitaSavePath);
-            Analytics.TrackEvent("SaveList", "CreateSave", selectedSave.Name);
+            CreateGameSave(selectedSave);
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
             GameSave selectedSave = null;
-            if (lstSaves.SelectedItems.Count >= 1)
-                selectedSave = (GameSave)lstSaves.SelectedItems[0].Tag;
+            if (lstGameSaves.SelectedItems.Count >= 1)
+                selectedSave = (GameSave)lstGameSaves.SelectedItem.RowObject;
 
             if (selectedSave == null || selectedSave.BuiltIn)
                 selectedSave = null;
@@ -136,26 +146,25 @@ namespace NoitaSaveManager
                 if (res == DialogResult.Yes)
                 {
                     Directory.Delete(selectedSave.Location, true);
-                    lstSaves.Items.Remove(selectedSave.ListViewItem);
                     gameSaves.Remove(selectedSave.ID);
-                    UpdateSavesList();
                 }
                 Analytics.TrackEvent("SaveList", "DeleteSave", selectedSave.Name);
+                lstGameSaves.BuildList(true);
             }
         }
 
         private void btnPlay_Click(object sender, EventArgs e)
         {
             GameSave selectedSave = null;
-            if (lstSaves.SelectedItems.Count >= 1)
-                selectedSave = (GameSave)lstSaves.SelectedItems[0].Tag;
+            if (lstGameSaves.SelectedItems.Count >= 1)
+                selectedSave = (GameSave)lstGameSaves.SelectedItem.RowObject;
 
             if (selectedSave == null)
                 selectedSave = gameSaves["--default"];
 
             if (selectedSave.ID == "--default")
             {
-                GameHandler.Launch(installPath);
+                GameHandler.Launch(installPath, noitaSavePath);
                 return;
             }
 
@@ -169,13 +178,76 @@ namespace NoitaSaveManager
                 int.TryParse(input, out seed);
 
                 GameHandler.ClearSave(noitaSavePath);
-                GameHandler.Launch(installPath, seed);
+                GameHandler.Launch(installPath, noitaSavePath, seed);
                 return;
             }
 
             selectedSave.RestoreFromStore(noitaSavePath);
-            GameHandler.Launch(installPath);
+            GameHandler.Launch(installPath, noitaSavePath);
             Analytics.TrackEvent("SaveList", "PlaySave", selectedSave.Name);
+        }
+
+        private void GameHandler_GameFinished()
+        {
+            if(File.Exists(Path.Combine(noitaSavePath, "player.salakieli")))
+                CreateGameSave(null, true);
+        }
+
+        private void CreateGameSave(GameSave selectedSave, bool autosave = false)
+        {
+            string name;
+            string group = "Game Saves";
+            if (autosave == true)
+            {
+                name = "Autosave";
+                group = "Auto Saves";
+            }
+            else if (selectedSave == null)
+            {
+                name = Prompt.ShowDialog("Enter new save name");
+                if (name.Trim() == "")
+                    name = "Unnamed Save";
+            }
+            else
+            {
+                name = "Unknown";
+            }
+
+            string id = GetUnusedId(name);
+
+            string seed = "";
+            if (File.Exists(Path.Combine(noitaSavePath, "nsm_seed")))
+                seed = File.ReadAllText(Path.Combine(noitaSavePath, "nsm_seed"));
+
+            selectedSave = new GameSave
+            {
+                ID = id,
+                Name = name,
+                GameVersion = gameVersionHash,
+                Seed = seed,
+                Location = Path.Combine(localSavePath, id),
+                LastModified = DateTime.Now,
+                Subtitle = DateTime.Now.ToString(),
+                Group = group
+            };
+            gameSaves.Add(id, selectedSave);
+            selectedSave.LastModified = DateTime.Now;
+            selectedSave.CopyToStore(noitaSavePath);
+            Analytics.TrackEvent("SaveList", "CreateSave", selectedSave.Name);
+            RebuildSavesList();
+        }
+
+        private void RebuildSavesList()
+        {
+            if (lstGameSaves.InvokeRequired)
+            {
+                var d = new SafeCallDelegate(RebuildSavesList);
+                lstGameSaves.Invoke(d);
+            }
+            else
+            {
+                lstGameSaves.BuildList(true);
+            }
         }
 
         private string GetInstallPath()
@@ -210,59 +282,17 @@ namespace NoitaSaveManager
             }
         }
 
-        private ListViewItem CreateListViewItem(GameSave save)
+        private DescribedTaskRenderer CreateDescribedRowRenderer()
         {
-            ListViewItem lvi = new ListViewItem("");
-            lvi.Tag = save;
-            lvi.SubItems.Add("");
-            lstSaves.Items.Add(lvi);
-            return lvi;
-        }
-
-        private void UpdateSavesList()
-        {
-            foreach (var save in gameSaves.Values)
-            {
-                if (save.ListViewItem == null)
-                    save.ListViewItem = CreateListViewItem(save);
-
-                save.ListViewItem.Text = save.Name;
-                if (save.SubName != null)
-                {
-                    save.ListViewItem.SubItems[1].Text = save.SubName;
-                }
-                else
-                {
-                    string update = GameHandler.GameVersionHashToUpdate(save.GameVersion);
-                    save.ListViewItem.SubItems[1].Text = save.LastModified.ToString("yyyy-MM-dd HH:mm:ss") + (update != "" ? " - " + update : "");
-                }
-            }
-
-            SortSavesList();
-        }
-
-        public void SortSavesList()
-        {
-            ListView list = lstSaves;
-            int total = list.Items.Count;
-            list.BeginUpdate();
-            ListViewItem[] items = new ListViewItem[total];
-            for (int i = 0; i < total; i++)
-            {
-                int count = list.Items.Count;
-                int minIdx = 0;
-                for (int j = 1; j < count; j++)
-                {
-                    string a = list.Items[j].SubItems[1].Text;
-                    string b = list.Items[minIdx].SubItems[1].Text;
-                    if (a.CompareTo(b) > 0)
-                        minIdx = j;
-                }
-                items[i] = list.Items[minIdx];
-                list.Items.RemoveAt(minIdx);
-            }
-            list.Items.AddRange(items);
-            list.EndUpdate();
+            DescribedTaskRenderer renderer = new DescribedTaskRenderer();
+            renderer.DescriptionAspectName = "Subtitle";
+            renderer.TitleFont = new Font(Font.FontFamily, 9);
+            renderer.DescriptionFont = new Font(Font.FontFamily, 8);
+            renderer.DescriptionColor = Color.Gray;
+            renderer.ImageTextSpace = 0;
+            renderer.TitleDescriptionSpace = 1;
+            renderer.UseGdiTextRendering = true;
+            return renderer;
         }
 
         private string GetUnusedId(string name, int index = 0)

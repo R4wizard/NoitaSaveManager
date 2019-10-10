@@ -1,4 +1,5 @@
 .vs
+/.dont-commit/
 /NoitaSaveManager/bin/
 /NoitaSaveManager/obj/
 /packages/

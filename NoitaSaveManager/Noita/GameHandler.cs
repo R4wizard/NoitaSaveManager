@@ -9,24 +9,43 @@ using System.Windows.Forms;
 
 namespace NoitaSaveManager.Noita
 {
+    public delegate void GameFinishedHandler();
+
     public class GameHandler
     {
-        public static void Launch(string installPath, int seed = 0)
+        public static event GameFinishedHandler GameFinished;
+
+        public static bool IsRunning { get; private set; }
+
+        public static void Launch(string installPath, string savePath, int seed = 0)
         {
-            using (Process noita = new Process())
+            Process noita = new Process();
+            noita.StartInfo.FileName = Path.Combine(installPath, "noita.exe");
+            noita.StartInfo.WorkingDirectory = installPath;
+            noita.StartInfo.Arguments = "-no_logo_splashes";
+
+            if(seed != 0)
             {
-                noita.StartInfo.FileName = Path.Combine(installPath, "noita.exe");
-                noita.StartInfo.WorkingDirectory = installPath;
-                noita.StartInfo.Arguments = "-no_logo_splashes";
-
-                if(seed != 0)
-                {
-                    File.WriteAllText(Path.Combine(installPath, "magic.txt"), "<MagicNumbers WORLD_SEED=\"" + seed + "\" />");
-                    noita.StartInfo.Arguments += " -magic_numbers magic.txt";
-                }
-
-                noita.Start();
+                File.WriteAllText(Path.Combine(savePath, "nsm_seed"), seed.ToString());
+                File.WriteAllText(Path.Combine(installPath, "magic.txt"), "<MagicNumbers WORLD_SEED=\"" + seed + "\" />");
+                noita.StartInfo.Arguments += " -magic_numbers magic.txt";
+            } else
+            {
+                File.Delete(Path.Combine(savePath, "nsm_seed"));
             }
+
+            IsRunning = true;
+
+            noita.EnableRaisingEvents = true;
+            noita.Exited += Noita_Exited;
+
+            noita.Start();
+        }
+
+        private static void Noita_Exited(object sender, EventArgs e)
+        {
+            IsRunning = false;
+            GameFinished?.Invoke();
         }
 
         public static void ClearSave(string path)
@@ -42,6 +61,9 @@ namespace NoitaSaveManager.Noita
 
             if (File.Exists(Path.Combine(path, "world_state.salakieli")))
                 File.Delete(Path.Combine(path, "world_state.salakieli"));
+
+            if (File.Exists(Path.Combine(path, "nsm_seed")))
+                File.Delete(Path.Combine(path, "nsm_seed"));
         }
 
         public static string GameVersionHashToUpdate(string hash)
