@@ -1,5 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using NoitaSaveManager.Utils;
 
 namespace NoitaSaveManager.Noita
@@ -38,19 +41,39 @@ namespace NoitaSaveManager.Noita
             if (File.Exists(Path.Combine(path, "nsm_group")))
                 save.Group = File.ReadAllText(Path.Combine(path, "nsm_group"));
 
-            if (File.Exists(Path.Combine(path, "nsm_seed")))
-                save.Seed = File.ReadAllText(Path.Combine(path, "nsm_seed"));
-
             if (File.Exists(Path.Combine(path, "nsm_game_version")))
                 save.GameVersion = File.ReadAllText(Path.Combine(path, "nsm_game_version"));
 
             if (File.Exists(Path.Combine(path, "nsm_last_modified")))
                 save.LastModified = DateTime.Parse(File.ReadAllText(Path.Combine(path, "nsm_last_modified")));
 
-            if (save.Subtitle == "")
-                save.Subtitle = save.LastModified.ToString();
+            save.LoadSeed();
+            save.UpdateSubtitle();
 
             return save;
+        }
+
+        public void LoadSeed()
+        {
+            string streamFile = Path.Combine(Location, "world", ".stream_info");
+            if (!File.Exists(streamFile))
+                return;
+
+            byte[] worldStream = File.ReadAllBytes(streamFile);
+            byte[] intBytes = worldStream.Skip(0xD).Take(4).Reverse().ToArray();
+            Seed = BitConverter.ToUInt32(intBytes, 0).ToString();
+        }
+
+        public void UpdateSubtitle()
+        {
+            if (Subtitle == "")
+            {
+                Subtitle = LastModified.ToString();
+
+                string update = GameHandler.GameVersionHashToUpdate(GameVersion);
+                if (update != "")
+                    Subtitle += " - " + update;
+            }
         }
 
         public void CopyToStore(string noitaPath)
@@ -73,10 +96,6 @@ namespace NoitaSaveManager.Noita
 
             if (File.Exists(Path.Combine(noitaPath, "world_state.salakieli")))
                 File.Copy(Path.Combine(noitaPath, "world_state.salakieli"), Path.Combine(Location, "world_state.salakieli"));
-
-            string seedPath = Path.Combine(noitaPath, "nsm_seed");
-            if (File.Exists(seedPath))
-                File.Copy(seedPath, Path.Combine(Location, "nsm_seed"));
         }
 
         public void RestoreFromStore(string noitaPath)
@@ -91,10 +110,12 @@ namespace NoitaSaveManager.Noita
 
             if (File.Exists(Path.Combine(Location, "world_state.salakieli")))
                 File.Copy(Path.Combine(Location, "world_state.salakieli"), Path.Combine(noitaPath, "world_state.salakieli"));
+        }
 
-            string seedPath = Path.Combine(Location, "nsm_seed");
-            if (File.Exists(seedPath))
-                File.Copy(seedPath, Path.Combine(noitaPath, "nsm_seed"));
+        public string DecryptFile(string filename)
+        {
+            return ""; // see NoitaSaveManager.UnreleasedCrypto.SaveFileDecrypter
         }
     }
 }
+

@@ -19,19 +19,48 @@ namespace NoitaSaveManager.Noita
 
         public static void Launch(string installPath, string savePath, int seed = 0)
         {
+            LaunchNonSteam(installPath, savePath, seed);
+        }
+
+        public static void LaunchNonSteam(string installPath, string savePath, int seed = 0)
+        {
             Process noita = new Process();
             noita.StartInfo.FileName = Path.Combine(installPath, "noita.exe");
             noita.StartInfo.WorkingDirectory = installPath;
             noita.StartInfo.Arguments = "-no_logo_splashes";
 
-            if(seed != 0)
+            if (seed != 0)
             {
                 File.WriteAllText(Path.Combine(savePath, "nsm_seed"), seed.ToString());
                 File.WriteAllText(Path.Combine(installPath, "magic.txt"), "<MagicNumbers WORLD_SEED=\"" + seed + "\" />");
                 noita.StartInfo.Arguments += " -magic_numbers magic.txt";
-            } else
+            }
+            else
             {
                 File.Delete(Path.Combine(savePath, "nsm_seed"));
+            }
+
+            IsRunning = true;
+
+            noita.EnableRaisingEvents = true;
+            noita.Exited += Noita_Exited;
+
+            noita.Start();
+        }
+
+        public static void LaunchSteam(string installPath, string savePath, int seed = 0)
+        {
+            // THIS CODE CURRENTLY BREAKS THE AUTOSAVING CODE
+            // WE CAN'T USE THIS UNTIL THAT IS FIXED
+            
+            Process noita = new Process();
+            noita.StartInfo.FileName = "steam://run/881100//-no_logo_splashes";
+            noita.StartInfo.WorkingDirectory = installPath;
+
+            if (seed != 0)
+            {
+                File.WriteAllText(Path.Combine(installPath, "magic.txt"), "<MagicNumbers WORLD_SEED=\"" + seed + "\" />");
+                noita.StartInfo.FileName += " -magic_numbers magic.txt";
             }
 
             IsRunning = true;

@@ -5,7 +5,7 @@ function Build-NSM {
 	Clean-Up
 	Build-Solution "NoitaSaveManager.sln"
 	Delete-Xml-And-Pdb
-	Copy-License
+	Copy-License-And-Thanks
 	Create-Release-Installer
 	Create-Release-Zip
 
@@ -49,10 +49,11 @@ function Delete-Xml-And-Pdb
 	rm "NoitaSaveManager\bin\Release\*.pdb"
 }
 
-function Copy-License
+function Copy-License-And-Thanks
 {
-	Write-Host "Copying GPL license" -foregroundcolor green
+	Write-Host "Copying GPL license and thank you notes" -foregroundcolor green
 	Copy-Item -Path LICENSE -Destination "NoitaSaveManager\bin\Release"
+	Copy-Item -Path THANKS -Destination "NoitaSaveManager\bin\Release"
 }
 
 function Create-Release-Installer

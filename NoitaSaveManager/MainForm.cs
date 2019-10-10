@@ -215,21 +215,19 @@ namespace NoitaSaveManager
 
             string id = GetUnusedId(name);
 
-            string seed = "";
-            if (File.Exists(Path.Combine(noitaSavePath, "nsm_seed")))
-                seed = File.ReadAllText(Path.Combine(noitaSavePath, "nsm_seed"));
-
             selectedSave = new GameSave
             {
                 ID = id,
                 Name = name,
                 GameVersion = gameVersionHash,
-                Seed = seed,
                 Location = Path.Combine(localSavePath, id),
                 LastModified = DateTime.Now,
-                Subtitle = DateTime.Now.ToString(),
                 Group = group
             };
+
+            selectedSave.LoadSeed();
+            selectedSave.UpdateSubtitle();
+
             gameSaves.Add(id, selectedSave);
             selectedSave.LastModified = DateTime.Now;
             selectedSave.CopyToStore(noitaSavePath);
@@ -302,6 +300,12 @@ namespace NoitaSaveManager
             if (!Directory.Exists(path))
                 return id;
             return GetUnusedId(name, index + 1);
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+            AboutForm about = new AboutForm();
+            about.ShowDialog();
         }
     }
 }
