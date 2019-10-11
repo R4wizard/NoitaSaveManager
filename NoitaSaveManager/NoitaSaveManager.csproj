@@ -71,6 +71,14 @@
     <Compile Include="AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="LCAPForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LCAPForm.Designer.cs">
+      <DependentUpon>LCAPForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Noita\SeedRecipe.cs" />
+    <Compile Include="Noita\PseudoRNG.cs" />
     <Compile Include="Utils\Analytics.cs" />
     <Compile Include="Utils\CopyDirectory.cs" />
     <Compile Include="MainForm.cs">
@@ -88,6 +96,9 @@
     <Compile Include="Utils\Steam.cs" />
     <EmbeddedResource Include="AboutForm.resx">
       <DependentUpon>AboutForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LCAPForm.resx">
+      <DependentUpon>LCAPForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

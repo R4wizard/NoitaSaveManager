@@ -28,19 +28,24 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnPlay = new System.Windows.Forms.Button();
-            this.btnDelete = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lstGameSaves = new BrightIdeasSoftware.ObjectListView();
             this.olvGSColumnName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvGSColumnSeed = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.ctxMenuSavesList = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.deleteSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewLCAPRecipesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lstGameSaves)).BeginInit();
+            this.ctxMenuSavesList.SuspendLayout();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -73,22 +78,12 @@
             this.btnPlay.UseVisualStyleBackColor = true;
             this.btnPlay.Click += new System.EventHandler(this.btnPlay_Click);
             // 
-            // btnDelete
-            // 
-            this.btnDelete.Location = new System.Drawing.Point(95, 518);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(77, 29);
-            this.btnDelete.TabIndex = 11;
-            this.btnDelete.Text = "delete save";
-            this.btnDelete.UseVisualStyleBackColor = true;
-            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
-            // 
             // label1
             // 
             this.label1.ForeColor = System.Drawing.Color.Silver;
-            this.label1.Location = new System.Drawing.Point(178, 518);
+            this.label1.Location = new System.Drawing.Point(95, 518);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(175, 29);
+            this.label1.Size = new System.Drawing.Size(258, 29);
             this.label1.TabIndex = 12;
             this.label1.Text = "NSM by R4wizard";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -137,6 +132,34 @@
             this.olvGSColumnSeed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.olvGSColumnSeed.Width = 142;
             // 
+            // ctxMenuSavesList
+            // 
+            this.ctxMenuSavesList.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.deleteSaveToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.viewLCAPRecipesToolStripMenuItem});
+            this.ctxMenuSavesList.Name = "ctxMenuSavesList";
+            this.ctxMenuSavesList.Size = new System.Drawing.Size(181, 76);
+            // 
+            // deleteSaveToolStripMenuItem
+            // 
+            this.deleteSaveToolStripMenuItem.Name = "deleteSaveToolStripMenuItem";
+            this.deleteSaveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.deleteSaveToolStripMenuItem.Text = "Delete Save";
+            this.deleteSaveToolStripMenuItem.Click += new System.EventHandler(this.deleteSaveToolStripMenuItem_Click);
+            // 
+            // viewLCAPRecipesToolStripMenuItem
+            // 
+            this.viewLCAPRecipesToolStripMenuItem.Name = "viewLCAPRecipesToolStripMenuItem";
+            this.viewLCAPRecipesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.viewLCAPRecipesToolStripMenuItem.Text = "View LCAP Recipes";
+            this.viewLCAPRecipesToolStripMenuItem.Click += new System.EventHandler(this.viewLCAPRecipesToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -145,7 +168,6 @@
             this.ClientSize = new System.Drawing.Size(448, 559);
             this.Controls.Add(this.lstGameSaves);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.btnDelete);
             this.Controls.Add(this.btnPlay);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.pictureBox1);
@@ -160,6 +182,7 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lstGameSaves)).EndInit();
+            this.ctxMenuSavesList.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -169,13 +192,16 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnPlay;
-        private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private BrightIdeasSoftware.ObjectListView lstGameSaves;
         private BrightIdeasSoftware.OLVColumn olvGSColumnName;
         private BrightIdeasSoftware.OLVColumn olvGSColumnSeed;
+        private System.Windows.Forms.ContextMenuStrip ctxMenuSavesList;
+        private System.Windows.Forms.ToolStripMenuItem deleteSaveToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem viewLCAPRecipesToolStripMenuItem;
     }
 }
 

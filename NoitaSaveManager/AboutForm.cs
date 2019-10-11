@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NoitaSaveManager.Utils;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -30,6 +31,8 @@ namespace NoitaSaveManager
 
             if (File.Exists("LICENSE"))
                 textBox2.Text = File.ReadAllText("LICENSE");
+
+            Analytics.TrackPage("About Form", "/about-form");
         }
 
         private void button1_Click(object sender, EventArgs e)

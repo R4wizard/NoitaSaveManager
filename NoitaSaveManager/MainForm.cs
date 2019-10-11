@@ -105,6 +105,7 @@ namespace NoitaSaveManager
                 parms.GroupComparer = Comparer<BrightIdeasSoftware.OLVGroup>.Create((x, y) => (x.GroupId.CompareTo(y.GroupId)));
             };
 
+            lstGameSaves.ContextMenuStrip = ctxMenuSavesList;
             lstGameSaves.Sort(new OLVColumn("hidden", "LastModified"));
             lstGameSaves.CellPadding = new Rectangle(10, 3, 10, 3);
             lstGameSaves.RowHeight = 39;
@@ -131,7 +132,7 @@ namespace NoitaSaveManager
             CreateGameSave(selectedSave);
         }
 
-        private void btnDelete_Click(object sender, EventArgs e)
+        private void deleteSaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             GameSave selectedSave = null;
             if (lstGameSaves.SelectedItems.Count >= 1)
@@ -150,6 +151,22 @@ namespace NoitaSaveManager
                 }
                 Analytics.TrackEvent("SaveList", "DeleteSave", selectedSave.Name);
                 lstGameSaves.BuildList(true);
+            }
+        }
+
+        private void viewLCAPRecipesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GameSave selectedSave = null;
+            if (lstGameSaves.SelectedItems.Count >= 1)
+                selectedSave = (GameSave)lstGameSaves.SelectedItem.RowObject;
+
+            if (selectedSave == null || selectedSave.BuiltIn)
+                selectedSave = null;
+
+            if (selectedSave != null)
+            {
+                LCAPForm lcap = new LCAPForm(uint.Parse(selectedSave.Seed));
+                lcap.ShowDialog();
             }
         }
 
