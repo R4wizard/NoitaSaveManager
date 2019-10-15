@@ -17,12 +17,12 @@ namespace NoitaSaveManager.Noita
 
         public static bool IsRunning { get; private set; }
 
-        public static void Launch(string installPath, string savePath, int seed = 0)
+        public static void Launch(string installPath, string savePath, uint seed = 0, string biomeMap = "")
         {
-            LaunchNonSteam(installPath, savePath, seed);
+            LaunchNonSteam(installPath, savePath, seed, biomeMap);
         }
 
-        public static void LaunchNonSteam(string installPath, string savePath, int seed = 0)
+        public static void LaunchNonSteam(string installPath, string savePath, uint seed = 0, string biomeMap = "")
         {
             Process noita = new Process();
             noita.StartInfo.FileName = Path.Combine(installPath, "noita.exe");
@@ -31,13 +31,13 @@ namespace NoitaSaveManager.Noita
 
             if (seed != 0)
             {
-                File.WriteAllText(Path.Combine(savePath, "nsm_seed"), seed.ToString());
                 File.WriteAllText(Path.Combine(installPath, "magic.txt"), "<MagicNumbers WORLD_SEED=\"" + seed + "\" />");
                 noita.StartInfo.Arguments += " -magic_numbers magic.txt";
             }
-            else
+
+            if (biomeMap != "")
             {
-                File.Delete(Path.Combine(savePath, "nsm_seed"));
+                noita.StartInfo.Arguments += " -biome-map " + biomeMap;
             }
 
             IsRunning = true;
@@ -48,7 +48,7 @@ namespace NoitaSaveManager.Noita
             noita.Start();
         }
 
-        public static void LaunchSteam(string installPath, string savePath, int seed = 0)
+        public static void LaunchSteam(string installPath, string savePath, uint seed = 0, string biomeMap = "")
         {
             // THIS CODE CURRENTLY BREAKS THE AUTOSAVING CODE
             // WE CAN'T USE THIS UNTIL THAT IS FIXED
@@ -61,6 +61,11 @@ namespace NoitaSaveManager.Noita
             {
                 File.WriteAllText(Path.Combine(installPath, "magic.txt"), "<MagicNumbers WORLD_SEED=\"" + seed + "\" />");
                 noita.StartInfo.FileName += " -magic_numbers magic.txt";
+            }
+
+            if (biomeMap != "")
+            {
+                noita.StartInfo.FileName += " -biome-map " + biomeMap;
             }
 
             IsRunning = true;
@@ -101,6 +106,9 @@ namespace NoitaSaveManager.Noita
 
             if (hash == "")
                 return "";
+
+            if (hash == "c0ba23bc0c325a0dc06604f114ee8217112a23af")
+                return "update #4";
 
             if (hash == "3bbb44abfe5f4e08dcff1aba3160cd512f7e756c")
                 return "update #3";

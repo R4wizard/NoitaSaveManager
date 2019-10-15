@@ -121,7 +121,7 @@ namespace NoitaSaveManager.Noita
             }
             string str = sb.ToString();
             str = str.Replace("Magic Liquid", "Potion:");
-            return str.Substring(0, str.Length - 1);
+            return str.Substring(0, str.Length - 1) + " (" + material + ")";
         }
     }
 

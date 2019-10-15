@@ -71,14 +71,28 @@
     <Compile Include="AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="CustomPlayOptionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomPlayOptionsForm.Designer.cs">
+      <DependentUpon>CustomPlayOptionsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EditSaveForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditSaveForm.Designer.cs">
+      <DependentUpon>EditSaveForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="LCAPForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="LCAPForm.Designer.cs">
       <DependentUpon>LCAPForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Noita\GameSaveCrypto.cs" />
     <Compile Include="Noita\SeedRecipe.cs" />
     <Compile Include="Noita\PseudoRNG.cs" />
+    <Compile Include="Utils\AES128CounterMode.cs" />
     <Compile Include="Utils\Analytics.cs" />
     <Compile Include="Utils\CopyDirectory.cs" />
     <Compile Include="MainForm.cs">
@@ -96,6 +110,12 @@
     <Compile Include="Utils\Steam.cs" />
     <EmbeddedResource Include="AboutForm.resx">
       <DependentUpon>AboutForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomPlayOptionsForm.resx">
+      <DependentUpon>CustomPlayOptionsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EditSaveForm.resx">
+      <DependentUpon>EditSaveForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LCAPForm.resx">
       <DependentUpon>LCAPForm.cs</DependentUpon>

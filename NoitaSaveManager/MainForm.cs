@@ -72,9 +72,9 @@ namespace NoitaSaveManager
             gameSaves.Add("--custom", new GameSave
             {
                 ID = "--custom",
-                Name = "Play Noita with Custom Seed",
+                Name = "Play Noita with Custom Options",
                 Group = "New Game",
-                Subtitle = "Launch Noita with your own custom seed.",
+                Subtitle = "Launch Noita with your own custom options.",
                 BuiltIn = true
             });
 
@@ -96,15 +96,22 @@ namespace NoitaSaveManager
             {
                 group.Id = 2;
 
-                if (group.Name == "Play Game")
+                if ((string)group.Key == "New Game")
                     group.Id = 1;
 
-                if (group.Name == "Auto Saves")
+                if ((string)group.Key == "Auto Saves")
+                {
                     group.Id = 3;
-                
+                    group.Collapsed = true;
+                    group.Task = "delete all";
+                }
+
                 parms.GroupComparer = Comparer<BrightIdeasSoftware.OLVGroup>.Create((x, y) => (x.GroupId.CompareTo(y.GroupId)));
             };
 
+
+            lstGameSaves.BeforeCreatingGroups += LstGameSaves_BeforeCreatingGroups;
+            lstGameSaves.GroupTaskClicked += LstGameSaves_GroupTaskClicked;
             lstGameSaves.ContextMenuStrip = ctxMenuSavesList;
             lstGameSaves.Sort(new OLVColumn("hidden", "LastModified"));
             lstGameSaves.CellPadding = new Rectangle(10, 3, 10, 3);
@@ -113,14 +120,40 @@ namespace NoitaSaveManager
             lstGameSaves.SetObjects(gameSaves.Values);
         }
 
+        private void LstGameSaves_GroupTaskClicked(object sender, GroupTaskClickedEventArgs e)
+        {
+            if(e.Group.Key.ToString() == "Auto Saves")
+            {
+                DialogResult res = MessageBox.Show("Clear all existing auto saves?", "Clear Auto Saves", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (res == DialogResult.Yes)
+                {
+                    List<GameSave> toRemove = new List<GameSave>();
+                    foreach (var save in gameSaves.Values)
+                    {
+                        if (save.Group == "Auto Saves")
+                            toRemove.Add(save);
+                    }
+                    foreach(var save in toRemove) {
+                        save.Delete();
+                        gameSaves.Remove(save.ID);
+                    }
+                    lstGameSaves.BuildList(true);
+                }
+            }
+        }
+
+        private void LstGameSaves_BeforeCreatingGroups(object sender, CreateGroupsEventArgs e)
+        {
+            e.Parameters.ItemComparer = Comparer<BrightIdeasSoftware.OLVListItem>.Create((x, y) => {
+                GameSave gsX = (GameSave)x.RowObject;
+                GameSave gsY = (GameSave)y.RowObject;
+                return gsY.LastModified.CompareTo(gsX.LastModified);
+            });
+        }
+
         private void btnSave_Click(object sender, EventArgs e)
         {
-            GameSave selectedSave = null;
-            if (lstGameSaves.SelectedItems.Count >= 1)
-                selectedSave = (GameSave)lstGameSaves.SelectedItem.RowObject;
-
-            if (selectedSave == null || selectedSave.BuiltIn)
-                selectedSave = null;
+            GameSave selectedSave = GetSelectedSave(false);
 
             if (selectedSave != null)
             {
@@ -134,47 +167,33 @@ namespace NoitaSaveManager
 
         private void deleteSaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            GameSave selectedSave = null;
-            if (lstGameSaves.SelectedItems.Count >= 1)
-                selectedSave = (GameSave)lstGameSaves.SelectedItem.RowObject;
+            GameSave selectedSave = GetSelectedSave(false);
+            if (selectedSave == null)
+                return;
 
-            if (selectedSave == null || selectedSave.BuiltIn)
-                selectedSave = null;
-
-            if (selectedSave != null)
+            DialogResult res = MessageBox.Show("Remove save '" + selectedSave.Name + "'?", "Remove Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (res == DialogResult.Yes)
             {
-                DialogResult res = MessageBox.Show("Remove save '" + selectedSave.Name + "'?", "Remove Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (res == DialogResult.Yes)
-                {
-                    Directory.Delete(selectedSave.Location, true);
-                    gameSaves.Remove(selectedSave.ID);
-                }
-                Analytics.TrackEvent("SaveList", "DeleteSave", selectedSave.Name);
-                lstGameSaves.BuildList(true);
+                selectedSave.Delete();
+                gameSaves.Remove(selectedSave.ID);
             }
+            Analytics.TrackEvent("SaveList", "DeleteSave", selectedSave.Name);
+            lstGameSaves.BuildList(true);
         }
 
         private void viewLCAPRecipesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            GameSave selectedSave = null;
-            if (lstGameSaves.SelectedItems.Count >= 1)
-                selectedSave = (GameSave)lstGameSaves.SelectedItem.RowObject;
+            GameSave selectedSave = GetSelectedSave(false);
+            if (selectedSave == null)
+                return;
 
-            if (selectedSave == null || selectedSave.BuiltIn)
-                selectedSave = null;
-
-            if (selectedSave != null)
-            {
-                LCAPForm lcap = new LCAPForm(uint.Parse(selectedSave.Seed));
-                lcap.ShowDialog();
-            }
+            LCAPForm lcap = new LCAPForm(uint.Parse(selectedSave.Seed));
+            lcap.ShowDialog();
         }
 
         private void btnPlay_Click(object sender, EventArgs e)
         {
-            GameSave selectedSave = null;
-            if (lstGameSaves.SelectedItems.Count >= 1)
-                selectedSave = (GameSave)lstGameSaves.SelectedItem.RowObject;
+            GameSave selectedSave = GetSelectedSave();
 
             if (selectedSave == null)
                 selectedSave = gameSaves["--default"];
@@ -182,20 +201,18 @@ namespace NoitaSaveManager
             if (selectedSave.ID == "--default")
             {
                 GameHandler.Launch(installPath, noitaSavePath);
+                Analytics.TrackEvent("SaveList", "PlaySave", "Built-in: Default");
                 return;
             }
 
             if (selectedSave.ID == "--custom")
             {
-                string input = Prompt.ShowDialog("Enter your custom seed");
-                if (input.Trim() == "")
-                    return;
-
-                int seed = 0;
-                int.TryParse(input, out seed);
+                CustomPlayOptionsForm cpo = new CustomPlayOptionsForm();
+                cpo.ShowDialog();
 
                 GameHandler.ClearSave(noitaSavePath);
-                GameHandler.Launch(installPath, noitaSavePath, seed);
+                GameHandler.Launch(installPath, noitaSavePath, cpo.Seed, cpo.BiomeMap);
+                Analytics.TrackEvent("SaveList", "PlaySave", "Built-in: Custom");
                 return;
             }
 
@@ -212,42 +229,46 @@ namespace NoitaSaveManager
 
         private void CreateGameSave(GameSave selectedSave, bool autosave = false)
         {
-            string name;
+            bool creatingNewSave = false;
+            string name = "Unknown";
             string group = "Game Saves";
             if (autosave == true)
             {
                 name = "Autosave";
                 group = "Auto Saves";
-            }
-            else if (selectedSave == null)
+                creatingNewSave = true;
+            } else if (selectedSave == null)
             {
                 name = Prompt.ShowDialog("Enter new save name");
                 if (name.Trim() == "")
                     name = "Unnamed Save";
-            }
-            else
-            {
-                name = "Unknown";
+                creatingNewSave = true;
             }
 
-            string id = GetUnusedId(name);
-
-            selectedSave = new GameSave
+            string id;
+            if (creatingNewSave)
             {
-                ID = id,
-                Name = name,
-                GameVersion = gameVersionHash,
-                Location = Path.Combine(localSavePath, id),
-                LastModified = DateTime.Now,
-                Group = group
-            };
+                id = GetUnusedId(name);
+                selectedSave = new GameSave
+                {
+                    ID = id,
+                    Name = name,
+                    GameVersion = gameVersionHash,
+                    Location = Path.Combine(localSavePath, id),
+                    LastModified = DateTime.Now,
+                    Group = group
+                };
+                gameSaves.Add(id, selectedSave);
+            } else
+            {
+                id = selectedSave.ID;
+            }
 
-            selectedSave.LoadSeed();
-            selectedSave.UpdateSubtitle();
-
-            gameSaves.Add(id, selectedSave);
-            selectedSave.LastModified = DateTime.Now;
             selectedSave.CopyToStore(noitaSavePath);
+            selectedSave.LastModified = DateTime.Now;
+            selectedSave.LoadSeed();
+            selectedSave.LoadEncryptedData();
+            selectedSave.UpdateSubtitle();
             Analytics.TrackEvent("SaveList", "CreateSave", selectedSave.Name);
             RebuildSavesList();
         }
@@ -323,6 +344,71 @@ namespace NoitaSaveManager
         {
             AboutForm about = new AboutForm();
             about.ShowDialog();
+        }
+
+        private void openFolderInExplorerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GameSave selectedSave = GetSelectedSave();
+            if (selectedSave == null)
+                return;
+
+            string path = selectedSave.Location;
+            if (selectedSave.BuiltIn)
+                path = noitaSavePath;
+
+            Process.Start(path);
+        }
+
+        private void decryptSaveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GameSave selectedSave = GetSelectedSave(false);
+            if (selectedSave == null)
+                return;
+
+            selectedSave.Decrypt();
+            MessageBox.Show("Save file has successfully been decrypted.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void encryptSaveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GameSave selectedSave = GetSelectedSave(false);
+            if (selectedSave == null)
+                return;
+
+            selectedSave.Encrypt();
+            MessageBox.Show("Save file has successfully been encrypted.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+
+        private GameSave GetSelectedSave(bool allowBuiltIn = true)
+        {
+            GameSave selectedSave = null;
+            if (lstGameSaves.SelectedItems.Count >= 1)
+                selectedSave = (GameSave)lstGameSaves.SelectedItem.RowObject;
+
+            if (allowBuiltIn == false && selectedSave != null && selectedSave.BuiltIn == true)
+                return null;
+
+            return selectedSave;
+        }
+
+        private void lstGameSaves_DoubleClick(object sender, EventArgs e)
+        {
+            btnPlay_Click(sender, e);
+        }
+
+        private void editSaveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GameSave selectedSave = GetSelectedSave(false);
+            if (selectedSave == null)
+                return;
+
+            EditSaveForm cpo = new EditSaveForm(selectedSave);
+            cpo.ShowDialog();
+            selectedSave.LoadEncryptedData();
+            selectedSave.LoadSeed();
+            selectedSave.UpdateSubtitle();
+            RebuildSavesList();
         }
     }
 }

@@ -30,7 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnPlay = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -38,25 +37,21 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lstGameSaves = new BrightIdeasSoftware.ObjectListView();
             this.olvGSColumnName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.olvGSColumnSeed = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.ctxMenuSavesList = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.deleteSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewLCAPRecipesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFolderInExplorerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.advancedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.decryptSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.encryptSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.lstGameSaves)).BeginInit();
             this.ctxMenuSavesList.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = global::NoitaSaveManager.Properties.Resources.logo;
-            this.pictureBox1.Location = new System.Drawing.Point(12, 12);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(424, 224);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
             // 
             // btnSave
             // 
@@ -101,11 +96,9 @@
             // lstGameSaves
             // 
             this.lstGameSaves.AllColumns.Add(this.olvGSColumnName);
-            this.lstGameSaves.AllColumns.Add(this.olvGSColumnSeed);
             this.lstGameSaves.CellEditUseWholeCell = false;
             this.lstGameSaves.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.olvGSColumnName,
-            this.olvGSColumnSeed});
+            this.olvGSColumnName});
             this.lstGameSaves.Cursor = System.Windows.Forms.Cursors.Default;
             this.lstGameSaves.FullRowSelect = true;
             this.lstGameSaves.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
@@ -117,6 +110,7 @@
             this.lstGameSaves.TabIndex = 13;
             this.lstGameSaves.UseCompatibleStateImageBehavior = false;
             this.lstGameSaves.View = System.Windows.Forms.View.Details;
+            this.lstGameSaves.DoubleClick += new System.EventHandler(this.lstGameSaves_DoubleClick);
             // 
             // olvGSColumnName
             // 
@@ -125,40 +119,89 @@
             this.olvGSColumnName.Text = "Name";
             this.olvGSColumnName.Width = 188;
             // 
-            // olvGSColumnSeed
-            // 
-            this.olvGSColumnSeed.AspectName = "Seed";
-            this.olvGSColumnSeed.Text = "Seed";
-            this.olvGSColumnSeed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.olvGSColumnSeed.Width = 142;
-            // 
             // ctxMenuSavesList
             // 
             this.ctxMenuSavesList.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.deleteSaveToolStripMenuItem,
+            this.viewLCAPRecipesToolStripMenuItem,
             this.toolStripSeparator1,
-            this.viewLCAPRecipesToolStripMenuItem});
+            this.editSaveToolStripMenuItem,
+            this.deleteSaveToolStripMenuItem,
+            this.openFolderInExplorerToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.advancedToolStripMenuItem});
             this.ctxMenuSavesList.Name = "ctxMenuSavesList";
-            this.ctxMenuSavesList.Size = new System.Drawing.Size(181, 76);
-            // 
-            // deleteSaveToolStripMenuItem
-            // 
-            this.deleteSaveToolStripMenuItem.Name = "deleteSaveToolStripMenuItem";
-            this.deleteSaveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.deleteSaveToolStripMenuItem.Text = "Delete Save";
-            this.deleteSaveToolStripMenuItem.Click += new System.EventHandler(this.deleteSaveToolStripMenuItem_Click);
+            this.ctxMenuSavesList.Size = new System.Drawing.Size(196, 126);
             // 
             // viewLCAPRecipesToolStripMenuItem
             // 
             this.viewLCAPRecipesToolStripMenuItem.Name = "viewLCAPRecipesToolStripMenuItem";
-            this.viewLCAPRecipesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.viewLCAPRecipesToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.viewLCAPRecipesToolStripMenuItem.Text = "View LCAP Recipes";
             this.viewLCAPRecipesToolStripMenuItem.Click += new System.EventHandler(this.viewLCAPRecipesToolStripMenuItem_Click);
+            // 
+            // deleteSaveToolStripMenuItem
+            // 
+            this.deleteSaveToolStripMenuItem.Name = "deleteSaveToolStripMenuItem";
+            this.deleteSaveToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.deleteSaveToolStripMenuItem.Text = "Delete Save";
+            this.deleteSaveToolStripMenuItem.Click += new System.EventHandler(this.deleteSaveToolStripMenuItem_Click);
+            // 
+            // openFolderInExplorerToolStripMenuItem
+            // 
+            this.openFolderInExplorerToolStripMenuItem.Name = "openFolderInExplorerToolStripMenuItem";
+            this.openFolderInExplorerToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.openFolderInExplorerToolStripMenuItem.Text = "Open folder in Explorer";
+            this.openFolderInExplorerToolStripMenuItem.Click += new System.EventHandler(this.openFolderInExplorerToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(192, 6);
+            // 
+            // advancedToolStripMenuItem
+            // 
+            this.advancedToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.decryptSaveToolStripMenuItem,
+            this.encryptSaveToolStripMenuItem});
+            this.advancedToolStripMenuItem.Name = "advancedToolStripMenuItem";
+            this.advancedToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.advancedToolStripMenuItem.Text = "Advanced";
+            // 
+            // decryptSaveToolStripMenuItem
+            // 
+            this.decryptSaveToolStripMenuItem.Name = "decryptSaveToolStripMenuItem";
+            this.decryptSaveToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.decryptSaveToolStripMenuItem.Text = "Decrypt Save";
+            this.decryptSaveToolStripMenuItem.Click += new System.EventHandler(this.decryptSaveToolStripMenuItem_Click);
+            // 
+            // encryptSaveToolStripMenuItem
+            // 
+            this.encryptSaveToolStripMenuItem.Name = "encryptSaveToolStripMenuItem";
+            this.encryptSaveToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.encryptSaveToolStripMenuItem.Text = "Encrypt Save";
+            this.encryptSaveToolStripMenuItem.Click += new System.EventHandler(this.encryptSaveToolStripMenuItem_Click);
+            // 
+            // editSaveToolStripMenuItem
+            // 
+            this.editSaveToolStripMenuItem.Name = "editSaveToolStripMenuItem";
+            this.editSaveToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.editSaveToolStripMenuItem.Text = "Edit Save";
+            this.editSaveToolStripMenuItem.Click += new System.EventHandler(this.editSaveToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(192, 6);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = global::NoitaSaveManager.Properties.Resources.logo;
+            this.pictureBox1.Location = new System.Drawing.Point(12, 12);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(424, 224);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
             // 
             // MainForm
             // 
@@ -180,9 +223,9 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Noita Save Manager";
             this.Load += new System.EventHandler(this.Form1_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lstGameSaves)).EndInit();
             this.ctxMenuSavesList.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -197,11 +240,16 @@
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private BrightIdeasSoftware.ObjectListView lstGameSaves;
         private BrightIdeasSoftware.OLVColumn olvGSColumnName;
-        private BrightIdeasSoftware.OLVColumn olvGSColumnSeed;
         private System.Windows.Forms.ContextMenuStrip ctxMenuSavesList;
         private System.Windows.Forms.ToolStripMenuItem deleteSaveToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem viewLCAPRecipesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openFolderInExplorerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem advancedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem decryptSaveToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem encryptSaveToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem editSaveToolStripMenuItem;
     }
 }
 

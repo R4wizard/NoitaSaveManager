@@ -18,14 +18,14 @@ namespace NoitaSaveManager
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            try
-            {
+            //try
+            //{
                 Application.Run(new MainForm());
-            } catch (Exception ex)
-            {
-                Analytics.TrackEvent("Global", "Exception", ex.ToString());
-                throw ex;
-            }
+            //} catch (Exception ex)
+            //{
+                //Analytics.TrackEvent("Global", "Exception", ex.ToString());
+                //throw ex;
+            //}
         }
     }
 }
