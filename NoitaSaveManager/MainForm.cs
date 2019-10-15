@@ -25,6 +25,11 @@ namespace NoitaSaveManager
 
         public MainForm()
         {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
             gameSaves = new Dictionary<string, GameSave>();
 
             installPath = GetInstallPath();
@@ -46,11 +51,6 @@ namespace NoitaSaveManager
             if (!Directory.Exists(localSavePath))
                 Directory.CreateDirectory(localSavePath);
 
-            InitializeComponent();
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
             AutoUpdater.UpdateFormSize = new System.Drawing.Size(500, 500);
             AutoUpdater.RunUpdateAsAdmin = true;
             AutoUpdater.ShowRemindLaterButton = false;
