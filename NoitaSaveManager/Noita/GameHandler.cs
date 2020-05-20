@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,6 +15,7 @@ namespace NoitaSaveManager.Noita
     public class GameHandler
     {
         public static event GameFinishedHandler GameFinished;
+        public static event EventHandler<GameStartedEventArgs> GameStarted;
 
         public static bool IsRunning { get; private set; }
 
@@ -31,7 +33,8 @@ namespace NoitaSaveManager.Noita
 
             if (seed != 0)
             {
-                File.WriteAllText(Path.Combine(installPath, "magic.txt"), "<MagicNumbers WORLD_SEED=\"" + seed + "\" />");
+                File.WriteAllText(Path.Combine(installPath, "magic.txt"),
+                    "<MagicNumbers WORLD_SEED=\"" + seed + "\" />");
                 noita.StartInfo.Arguments += " -magic_numbers magic.txt";
             }
 
@@ -52,28 +55,34 @@ namespace NoitaSaveManager.Noita
         {
             // THIS CODE CURRENTLY BREAKS THE AUTOSAVING CODE
             // WE CAN'T USE THIS UNTIL THAT IS FIXED
-            
-            Process noita = new Process();
-            noita.StartInfo.FileName = "steam://run/881100//-no_logo_splashes";
-            noita.StartInfo.WorkingDirectory = installPath;
+
+            Process noitaLauncher = new Process();
+            noitaLauncher.StartInfo.FileName = "steam://run/881100//-no_logo_splashes";
+            noitaLauncher.StartInfo.WorkingDirectory = installPath;
 
             if (seed != 0)
             {
-                File.WriteAllText(Path.Combine(installPath, "magic.txt"), "<MagicNumbers WORLD_SEED=\"" + seed + "\" />");
-                noita.StartInfo.FileName += " -magic_numbers magic.txt";
+                File.WriteAllText(Path.Combine(installPath, "magic.txt"),
+                    "<MagicNumbers WORLD_SEED=\"" + seed + "\" />");
+                noitaLauncher.StartInfo.FileName += " -magic_numbers magic.txt";
             }
 
             if (biomeMap != "")
             {
-                noita.StartInfo.FileName += " -biome-map " + biomeMap;
+                noitaLauncher.StartInfo.FileName += " -biome-map " + biomeMap;
             }
 
             IsRunning = true;
 
-            noita.EnableRaisingEvents = true;
-            noita.Exited += Noita_Exited;
+            GameStarted += (Object sender, GameStartedEventArgs args) =>
+            {
+                Process noita = args.Noita;
+                noita.EnableRaisingEvents = true;
+                noita.Exited += Noita_Exited;
+            };
 
-            noita.Start();
+            Detect_Steam_Game_Process(installPath);
+            noitaLauncher.Start();
         }
 
         private static void Noita_Exited(object sender, EventArgs e)
@@ -119,5 +128,40 @@ namespace NoitaSaveManager.Noita
             hash = hash.Substring(0, 6);
             return "update #" + hash;
         }
+
+        public static void Detect_Steam_Game_Process(string installPath, int timeout=60)
+        {
+            Process noita = null;
+            Thread thread = new Thread(() =>
+            {
+                int t = 0;
+                while (t++<timeout)
+                {
+                    Process[] processes = Process.GetProcessesByName("noita");
+                    foreach (var p1 in processes)
+                    {
+                        if (p1.Modules[0].FileName.ToLower().StartsWith(installPath.ToLower()))
+                        {
+                            noita = p1;
+                            GameStartedEventArgs args=new GameStartedEventArgs();
+                            args.Noita = p1;
+                            GameStarted?.Invoke(null, args);
+                            break;
+                        }
+
+                        if (noita != null) break;
+                    }
+                    if (noita != null) break;
+                    Thread.Sleep(100);
+                }
+            });
+            thread.IsBackground = true;
+            thread.Start();
+        }
+    }
+
+    public class GameStartedEventArgs : EventArgs
+    {
+        public Process Noita { get; set; }
     }
 }
