@@ -210,9 +210,12 @@ namespace NoitaSaveManager
                 CustomPlayOptionsForm cpo = new CustomPlayOptionsForm();
                 cpo.ShowDialog();
 
-                GameHandler.ClearSave(noitaSavePath);
-                GameHandler.Launch(installPath, noitaSavePath, cpo.Seed, cpo.BiomeMap);
-                Analytics.TrackEvent("SaveList", "PlaySave", "Built-in: Custom");
+                if (!cpo.canceled)
+                {
+                    GameHandler.ClearSave(noitaSavePath);
+                    GameHandler.Launch(installPath, noitaSavePath, cpo.Seed, cpo.BiomeMap);
+                    Analytics.TrackEvent("SaveList", "PlaySave", "Built-in: Custom");
+                }
                 return;
             }
 

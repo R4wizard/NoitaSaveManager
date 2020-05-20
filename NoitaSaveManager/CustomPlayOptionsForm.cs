@@ -16,6 +16,7 @@ namespace NoitaSaveManager
     {
         public uint Seed = 0;
         public string BiomeMap = "";
+        public bool canceled = true;
 
         public CustomPlayOptionsForm()
         {
@@ -81,6 +82,7 @@ namespace NoitaSaveManager
 
         private void button1_Click(object sender, EventArgs e)
         {
+            canceled = false;
             Close();
         }
 
