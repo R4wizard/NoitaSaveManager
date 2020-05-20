@@ -72,11 +72,10 @@ namespace NoitaSaveManager.Noita
                 noitaLauncher.StartInfo.FileName += " -biome-map " + biomeMap;
             }
 
-            IsRunning = true;
-
             GameStarted += (Object sender, GameStartedEventArgs args) =>
             {
                 Process noita = args.Noita;
+                IsRunning = true;
                 noita.EnableRaisingEvents = true;
                 noita.Exited += Noita_Exited;
             };
