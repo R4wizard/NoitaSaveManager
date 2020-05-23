@@ -168,3 +168,4 @@ namespace NoitaSaveManager.Noita
     {
         public Process Noita { get; set; }
     }
+}
