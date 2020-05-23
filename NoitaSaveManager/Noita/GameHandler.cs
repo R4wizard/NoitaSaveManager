@@ -19,6 +19,8 @@ namespace NoitaSaveManager.Noita
 
         public static bool IsRunning { get; private set; }
 
+        private static Thread _thread;
+
         public static void Launch(string installPath, string savePath, uint seed = 0, string biomeMap = "")
         {
             LaunchNonSteam(installPath, savePath, seed, biomeMap);
@@ -57,7 +59,7 @@ namespace NoitaSaveManager.Noita
             // WE CAN'T USE THIS UNTIL THAT IS FIXED
 
             Process noitaLauncher = new Process();
-            noitaLauncher.StartInfo.FileName = "steam://run/881100//-no_logo_splashes";
+            noitaLauncher.StartInfo.FileName = "steam://run/881100//";
             noitaLauncher.StartInfo.WorkingDirectory = installPath;
 
             if (seed != 0)
@@ -128,34 +130,37 @@ namespace NoitaSaveManager.Noita
             return "update #" + hash;
         }
 
-        public static void Detect_Steam_Game_Process(string installPath, int timeout=60)
+        public static void Detect_Steam_Game_Process(string installPath)
         {
             Process noita = null;
-            Thread thread = new Thread(() =>
+            if (_thread == null || !_thread.IsAlive)
             {
-                int t = 0;
-                while (t++<timeout)
+                _thread = new Thread(() =>
                 {
-                    Process[] processes = Process.GetProcessesByName("noita");
-                    foreach (var p1 in processes)
+                    while (true)
                     {
-                        if (p1.Modules[0].FileName.ToLower().StartsWith(installPath.ToLower()))
+                        Process[] processes = Process.GetProcessesByName("noita");
+                        foreach (var p1 in processes)
                         {
-                            noita = p1;
-                            GameStartedEventArgs args=new GameStartedEventArgs();
-                            args.Noita = p1;
-                            GameStarted?.Invoke(null, args);
-                            break;
+                            if (p1.Modules[0].FileName.ToLower().StartsWith(installPath.ToLower()))
+                            {
+                                noita = p1;
+                                GameStartedEventArgs args = new GameStartedEventArgs();
+                                args.Noita = p1;
+                                GameStarted?.Invoke(null, args);
+                                break;
+                            }
+
+                            if (noita != null) break;
                         }
 
                         if (noita != null) break;
+                        Thread.Sleep(100);
                     }
-                    if (noita != null) break;
-                    Thread.Sleep(100);
-                }
-            });
-            thread.IsBackground = true;
-            thread.Start();
+                });
+                _thread.IsBackground = true;
+                _thread.Start();
+            }
         }
     }
 
@@ -163,4 +168,3 @@ namespace NoitaSaveManager.Noita
     {
         public Process Noita { get; set; }
     }
-}
