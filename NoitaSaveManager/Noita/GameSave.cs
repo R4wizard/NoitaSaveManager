@@ -179,8 +179,15 @@ namespace NoitaSaveManager.Noita
             if(File.Exists(Path.Combine(noitaPath, "player.salakieli")))
                 File.Copy(Path.Combine(noitaPath, "player.salakieli"), Path.Combine(Location, "player.salakieli"));
 
+            if (File.Exists(Path.Combine(noitaPath, "player.xml")))
+                File.Copy(Path.Combine(noitaPath, "player.xml"), Path.Combine(Location, "player.xml"));
+
             if (File.Exists(Path.Combine(noitaPath, "world_state.salakieli")))
                 File.Copy(Path.Combine(noitaPath, "world_state.salakieli"), Path.Combine(Location, "world_state.salakieli"));
+
+            if (File.Exists(Path.Combine(noitaPath, "world_state.xml")))
+                File.Copy(Path.Combine(noitaPath, "world_state.xml"), Path.Combine(Location, "world_state.xml"));
+
         }
 
         public void RestoreFromStore(string noitaPath)
@@ -193,8 +200,14 @@ namespace NoitaSaveManager.Noita
             if (File.Exists(Path.Combine(Location, "player.salakieli")))
                 File.Copy(Path.Combine(Location, "player.salakieli"), Path.Combine(noitaPath, "player.salakieli"));
 
+            if (File.Exists(Path.Combine(Location, "player.xml")))
+                File.Copy(Path.Combine(Location, "player.xml"), Path.Combine(noitaPath, "player.xml"));
+
             if (File.Exists(Path.Combine(Location, "world_state.salakieli")))
                 File.Copy(Path.Combine(Location, "world_state.salakieli"), Path.Combine(noitaPath, "world_state.salakieli"));
+
+            if (File.Exists(Path.Combine(Location, "world_state.xml")))
+                File.Copy(Path.Combine(Location, "world_state.xml"), Path.Combine(noitaPath, "world_state.xml"));
         }
 
         public void Delete()

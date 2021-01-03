@@ -223,7 +223,7 @@ namespace NoitaSaveManager
 
         private void GameHandler_GameFinished()
         {
-            if(File.Exists(Path.Combine(noitaSavePath, "player.salakieli")))
+            if(File.Exists(Path.Combine(noitaSavePath, "player.xml")) || File.Exists(Path.Combine(noitaSavePath, "player.salakieli")))
                 CreateGameSave(null, true);
         }
 

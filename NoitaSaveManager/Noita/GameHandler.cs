@@ -87,11 +87,20 @@ namespace NoitaSaveManager.Noita
             if (Directory.Exists(Path.Combine(path, "world")))
                 Directory.Delete(Path.Combine(path, "world"), true);
 
+            if (File.Exists(Path.Combine(path, "magic_numbers.xml")))
+                File.Delete(Path.Combine(path, "magic_numbers.xml"));
+
             if (File.Exists(Path.Combine(path, "magic_numbers.salakieli")))
                 File.Delete(Path.Combine(path, "magic_numbers.salakieli"));
 
+            if (File.Exists(Path.Combine(path, "player.xml")))
+                File.Delete(Path.Combine(path, "player.xml"));
+
             if (File.Exists(Path.Combine(path, "player.salakieli")))
                 File.Delete(Path.Combine(path, "player.salakieli"));
+
+            if (File.Exists(Path.Combine(path, "world_state.xml")))
+                File.Delete(Path.Combine(path, "world_state.xml"));
 
             if (File.Exists(Path.Combine(path, "world_state.salakieli")))
                 File.Delete(Path.Combine(path, "world_state.salakieli"));
